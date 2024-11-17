@@ -149,7 +149,7 @@ class BaseEnergyCostSensor(RestoreEntity, SensorEntity):
         return next_reset
 
     def schedule_next_reset(self):
-        if self._interval == "never":
+        if self._interval == "total":
             return
         next_reset = self.calculate_next_reset_time()
         async_track_point_in_time(self.hass, self._reset_meter, next_reset)
@@ -224,7 +224,7 @@ class YearlyEnergyCostSensor(BaseEnergyCostSensor):
 
 class TotalEnergyCostSensor(BaseEnergyCostSensor):
     def __init__(self, hass, energy_sensor_id, price_sensor_id):
-        super().__init__(hass, energy_sensor_id, price_sensor_id, "never")
+        super().__init__(hass, energy_sensor_id, price_sensor_id, "total")
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     energy_sensor_id = config_entry.data.get(ENERGY_SENSOR)
