@@ -104,7 +104,7 @@ class BaseEnergyCostSensor(RestoreEntity, SensorEntity):
         attrs['last_energy_reading'] = self._last_energy_reading
         attrs['average_energy_cost'] = self._state / self._cumulative_energy_kwh if self._cumulative_energy_kwh else 0
         return attrs
-    
+
     async def async_added_to_hass(self):
         """Load the last known state and subscribe to updates."""
         await super().async_added_to_hass()
@@ -149,6 +149,8 @@ class BaseEnergyCostSensor(RestoreEntity, SensorEntity):
         return next_reset
 
     def schedule_next_reset(self):
+        if self._interval == "never":
+            return
         next_reset = self.calculate_next_reset_time()
         async_track_point_in_time(self.hass, self._reset_meter, next_reset)
 
@@ -219,6 +221,10 @@ class MonthlyEnergyCostSensor(BaseEnergyCostSensor):
 class YearlyEnergyCostSensor(BaseEnergyCostSensor):
     def __init__(self, hass, energy_sensor_id, price_sensor_id):
         super().__init__(hass, energy_sensor_id, price_sensor_id, "yearly")
+
+class TotalEnergyCostSensor(BaseEnergyCostSensor):
+    def __init__(self, hass, energy_sensor_id, price_sensor_id):
+        super().__init__(hass, energy_sensor_id, price_sensor_id, "never")
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     energy_sensor_id = config_entry.data.get(ENERGY_SENSOR)
